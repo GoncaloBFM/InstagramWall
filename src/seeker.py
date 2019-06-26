@@ -1,18 +1,9 @@
-import pickle
-import random
-
 import time
-import traceback
-from sys import argv
 from selenium import webdriver
 from selenium.common.exceptions import StaleElementReferenceException
-from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import ui
 import pandas
-import os
 
 TAG = "makeup"
 # TAG = "auschwitz"

@@ -1,5 +1,4 @@
 import nmslib
-import matplotlib.pyplot as plt
 import pandas
 
 from src.similar_cnn_utils.CV_IO_utils import read_imgs_dir, read_img

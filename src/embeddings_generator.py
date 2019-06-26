@@ -1,9 +1,4 @@
-import os
-import random
-from uuid import UUID
-
 import numpy as np
-import pandas
 import tables
 import tensorflow as tf
 from tqdm import tqdm
@@ -12,10 +7,6 @@ from src.similar_cnn_utils.CV_IO_utils import read_imgs_dir
 from src.similar_cnn_utils.CV_transform_utils import apply_transformer
 from src.similar_cnn_utils.CV_transform_utils import resize_img, normalize_img
 import nmslib
-import matplotlib.pyplot as plt
-from matplotlib import offsetbox
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-from sklearn import manifold
 
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
