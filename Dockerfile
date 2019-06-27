@@ -1,5 +1,7 @@
 FROM python:3.7-slim-stretch
 
+RUN apt-get update && apt-get install -y vim g++
+
 RUN pip install \
 	pandas \
 	tqdm \
@@ -7,9 +9,8 @@ RUN pip install \
 	tables \
 	tensorflow \
 	requests \
-	scikit-image
-
-RUN apt-get update && apt-get install -y vim
+	scikit-image \
+	nmslib
 
 WORKDIR /InstagramWall/
 
