@@ -44,7 +44,7 @@ id_generator = IdGenerator()
 def main():
     seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE])
     with ThreadPoolExecutor(max_workers=SIMULTANEOUS) as executor:
-        tmp_files = tqdm(executor.map(try_download, seek_result), total=len(seek_result))
+        tmp_files = list(tqdm(executor.map(try_download, seek_result), total=len(seek_result)))
     seek_result = None
 
     print("Renaming")
