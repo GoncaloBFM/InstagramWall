@@ -43,7 +43,7 @@ id_generator = IdGenerator()
 
 def main():
     pool = Pool(SIMULTANEOUS)
-    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE][:100])
+    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE])
     executor = ThreadPoolExecutor(max_workers=SIMULTANEOUS)
     tmp_files = tqdm(executor.map(try_download, seek_result), total=len(seek_result))
     pool.close()
