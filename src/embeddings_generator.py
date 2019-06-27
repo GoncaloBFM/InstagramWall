@@ -1,6 +1,6 @@
 import numpy as np
-import tables
 import tensorflow as tf
+import pandas
 from tqdm import tqdm
 
 from similar_cnn_utils.CV_IO_utils import read_imgs_dir
@@ -11,9 +11,9 @@ import nmslib
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-# TAG = "makeup "
+TAG = "makeup"
 # TAG = "auschwitz"
-TAG = "planewindow"
+# TAG = "planewindow"
 # TAG = "sample"
 SEEK_RESULT_PATH = "../data/seek_result/{}.h5".format(TAG)
 IMAGES_PATH = "../data/thumbs/{}/".format(TAG)
@@ -31,16 +31,16 @@ class ImageTransformer(object):
         return img_transformed
 
 def main():
-    seek_result = tables.open_file(SEEK_RESULT_PATH, mode="r")
-    n_images = seek_result.root["image_ids"].table.shape[0]
-    seek_result.close()
-    processed = 0
+    n_images = pandas.read_hdf(SEEK_RESULT_PATH, key="image_ids", start=-1).iloc[0]["image_ids"] + 1
+    print(n_images)
+    exit()
 
     index = nmslib.init(method='hnsw', space='cosinesimil')
     first = True
 
     progress_bar = tqdm(total=n_images)
 
+    processed = 0
     while n_images - processed > 0:
         batch_image_ids = range(processed, processed + min(n_images - processed, BATCH_SIZE))
         batch_image_names = [IMAGES_PATH + str(image_id) + ".jpg" for image_id in batch_image_ids]

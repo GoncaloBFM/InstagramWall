@@ -1,3 +1,4 @@
+import os
 import shutil
 import threading
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -15,7 +16,7 @@ TAG = "makeup"
 # TAG = "auschwitz"
 # TAG = "planewindow"
 # TAG = "sample"
-SIMULTANEOUS = 2
+SIMULTANEOUS = 6
 IMAGE_SIZE = 2  # 1 - 5
 
 OUTPUT_DIRECTORY = "../data/thumbs/{}/".format(TAG)
@@ -42,10 +43,23 @@ id_generator = IdGenerator()
 
 def main():
     pool = Pool(SIMULTANEOUS)
-    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE])
-    executor = ThreadPoolExecutor(max_workers=2)
-    result = pandas.DataFrame(list(tqdm(executor.map(try_download, seek_result), total=len(seek_result))), columns=["image_ids"])
+    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE][:100])
+    executor = ThreadPoolExecutor(max_workers=SIMULTANEOUS)
+    tmp_files = tqdm(executor.map(try_download, seek_result), total=len(seek_result))
     pool.close()
+    seek_result = None
+
+    image_id = 0
+    result = []
+    for tmp_file in tmp_files:
+        if tmp_file is None:
+            result.append(None)
+        else:
+            os.rename(tmp_file, OUTPUT_DIRECTORY + str(image_id) + ".jpg")
+            result.append(image_id)
+            image_id += 1
+
+    result = pandas.DataFrame(list(result), columns=["image_ids"])
     result.to_hdf(SEEK_RESULT_PATH, key='image_ids', format="t", data_columns=True)
 
 
@@ -70,9 +84,10 @@ def download(link):
     if response.status_code != 200:
         raise HTTPError
     image_id = id_generator.generate()
-    with open(OUTPUT_DIRECTORY + str(image_id) + ".jpg", "wb") as f:
+    temp_file = OUTPUT_DIRECTORY + "tmp" + str(image_id) + ".jpg"
+    with open(temp_file, "wb") as f:
         shutil.copyfileobj(response.raw, f)
-    return image_id
+    return temp_file
 
 
 if __name__ == '__main__':
