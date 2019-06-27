@@ -1,3 +1,5 @@
+from utils.url_parsing import InstagramURLParser, BadThumbUrl
+
 import time
 from selenium import webdriver
 from selenium.common.exceptions import StaleElementReferenceException
@@ -10,7 +12,6 @@ TAG = "makeup"
 # TAG = "planewindow"
 # TAG = "sample"
 
-from src.utils.url_parsing import InstagramURLParser, BadThumbUrl
 
 THUMBNAIL_CLASS = "v1Nh3.kIKUG._bz0w"
 LOGGED_IN_CLASS = "glyphsSpriteUser__outline__24__grey_9 u-__7"
@@ -26,7 +27,7 @@ OUTPUT_FILE = OUTPUT_DIR + "{}.h5".format(TAG)
 def main():
     chrome_options = Options()
     # chrome_options.add_argument("user-data-dir=" + "/home/gbfm/.config/google-chrome/Default/")
-    # chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     driver = webdriver.Chrome("../lib/chromedriver", options=chrome_options)
     time.sleep(1)
     start_page(driver)

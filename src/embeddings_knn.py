@@ -1,8 +1,8 @@
 import nmslib
 import pandas
 
-from src.similar_cnn_utils.CV_IO_utils import read_imgs_dir, read_img
-from src.similar_cnn_utils.CV_plot_utils import plot_query_retrieval
+from similar_cnn_utils.CV_IO_utils import read_imgs_dir, read_img
+from similar_cnn_utils.CV_plot_utils import plot_query_retrieval
 
 TAG = "makeup"
 # TAG = "auschwitz"

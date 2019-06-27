@@ -3,9 +3,9 @@ import tables
 import tensorflow as tf
 from tqdm import tqdm
 
-from src.similar_cnn_utils.CV_IO_utils import read_imgs_dir
-from src.similar_cnn_utils.CV_transform_utils import apply_transformer
-from src.similar_cnn_utils.CV_transform_utils import resize_img, normalize_img
+from similar_cnn_utils.CV_IO_utils import read_imgs_dir
+from similar_cnn_utils.CV_transform_utils import apply_transformer
+from similar_cnn_utils.CV_transform_utils import resize_img, normalize_img
 import nmslib
 
 from PIL import ImageFile

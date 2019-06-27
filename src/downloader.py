@@ -9,7 +9,7 @@ import socket
 
 from requests import HTTPError, ConnectionError
 from tqdm import tqdm
-from src.utils.url_parsing import InstagramURLParser
+from utils.url_parsing import InstagramURLParser
 
 TAG = "makeup"
 # TAG = "auschwitz"
@@ -42,7 +42,7 @@ id_generator = IdGenerator()
 
 def main():
     pool = Pool(SIMULTANEOUS)
-    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE][:10])
+    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE])
     executor = ThreadPoolExecutor(max_workers=2)
     result = pandas.DataFrame(list(tqdm(executor.map(try_download, seek_result), total=len(seek_result))), columns=["image_ids"])
     pool.close()
