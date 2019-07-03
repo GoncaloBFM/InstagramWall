@@ -146,7 +146,7 @@ def main():
         clean_dataset(mark_all_dirty())
         return
     if sys.argv[1] == 'r' or sys.argv[1] == 'remove':
-        clean_dataset(delete_dataset())
+        delete_dataset()
         return
 
 
