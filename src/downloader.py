@@ -57,7 +57,7 @@ def log_decorator(func):
 
 @log_decorator
 def download_dataset():
-    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE])[:10]
+    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE])
     with ThreadPoolExecutor(max_workers=SIMULTANEOUS) as executor:
         tmp_files = list(tqdm(executor.map(try_download, seek_result), total=len(seek_result)))
     seek_result = None
@@ -70,6 +70,13 @@ def mark_all_dirty():
     for file_name in tqdm(os.listdir(OUTPUT_DIRECTORY)):
         old_file = OUTPUT_DIRECTORY + file_name
         os.rename(old_file, old_file + ".dirty")
+
+
+@log_decorator
+def delete_dataset():
+    for file_name in tqdm(os.listdir(OUTPUT_DIRECTORY)):
+        old_file = OUTPUT_DIRECTORY + file_name
+        os.remove(old_file)
 
 
 @log_decorator
@@ -129,7 +136,7 @@ def download(link):
 
 def main():
     if len(sys.argv) != 2:
-        print("Error: wrong number of arguments. Use 'download' or 'd' and 'cleanup' or 'c'.")
+        print("Error: wrong number of arguments. Use 'download' or 'd', 'cleanup' or 'c' and 'delete' or 'd'.")
         return
     if sys.argv[1] == 'd' or sys.argv[1] == 'download':
         download_dataset()
@@ -137,6 +144,9 @@ def main():
         return
     if sys.argv[1] == 'c' or sys.argv[1] == 'cleanup':
         clean_dataset(mark_all_dirty())
+        return
+    if sys.argv[1] == 'd' or sys.argv[1] == 'delete':
+        clean_dataset(delete_dataset())
         return
 
 
