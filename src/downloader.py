@@ -1,3 +1,4 @@
+import numpy
 import os
 import shutil
 import threading
@@ -8,6 +9,7 @@ import pandas
 import requests
 import socket
 
+import skimage
 from requests import HTTPError, ConnectionError
 from tqdm import tqdm
 from utils.url_parsing import InstagramURLParser
@@ -41,41 +43,75 @@ class IdGenerator:
 id_generator = IdGenerator()
 
 
-def main():
-    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE])
+def log_decorator(func):
+    def wrapper(*args, **kwargs):
+        print("Executing {}".format(func.__name__))
+        func(*args, **kwargs)
+        print("Finished {}".format(func.__name__))
+        print()
+    return wrapper
+
+
+@log_decorator
+def download_dataset():
+    seek_result = list(pandas.read_hdf(SEEK_RESULT_PATH, key='urls', columns=[THUMB_SIZE_CODE])[THUMB_SIZE_CODE])[:10]
     with ThreadPoolExecutor(max_workers=SIMULTANEOUS) as executor:
         tmp_files = list(tqdm(executor.map(try_download, seek_result), total=len(seek_result)))
     seek_result = None
+    result = pandas.DataFrame({"image_ids": pandas.Series(tmp_files, dtype="int16")})
+    result.to_hdf(SEEK_RESULT_PATH, key='image_ids', format="t", data_columns=True)
+    return list(result["image_ids"])
 
-    print("Renaming")
-    image_id = 0
-    result = []
-    for tmp_file in tmp_files:
-        if tmp_file is None:
-            result.append(None)
+
+@log_decorator
+def mark_all_dirty():
+    for file_name in tqdm(os.listdir(OUTPUT_DIRECTORY)):
+        old_file = OUTPUT_DIRECTORY + file_name
+        os.rename(old_file, old_file + ".dirty")
+
+
+@log_decorator
+def clean_dataset(image_ids=None):
+    if image_ids is None:
+        image_ids = list(pandas.read_hdf(SEEK_RESULT_PATH, key='image_ids')['image_ids'])
+
+    new_id = 0
+    for index, image_id in tqdm(enumerate(image_ids), total=len(image_ids)):
+        if image_id == -1:
+            continue
+        old_file = OUTPUT_DIRECTORY + str(image_id) + ".jpg.dirty"
+        try:
+            skimage.io.imread(old_file, as_gray=False)
+        except ValueError as ex:
+            os.remove(old_file)
+            image_ids[index] = -1
+            print("Faulty file: {}".format(old_file))
+            print()
+        except FileNotFoundError as ex:
+            image_ids[index] = -1
+            print("File not found: {}".format(old_file))
+            print()
         else:
-            os.rename(tmp_file, OUTPUT_DIRECTORY + str(image_id) + ".jpg")
-            result.append(image_id)
-            image_id += 1
-
-    result = pandas.DataFrame(list(result), columns=["image_ids"])
+            os.rename(old_file, OUTPUT_DIRECTORY + str(new_id) + ".jpg")
+            image_ids[index] = new_id
+            new_id += 1
+    result = pandas.DataFrame({"image_ids": pandas.Series(image_ids, dtype="int16")})
     result.to_hdf(SEEK_RESULT_PATH, key='image_ids', format="t", data_columns=True)
 
 
 def try_download(url):
     url = InstagramURLParser.reconstruct_thumb_url(url)
-
     try:
         return download(url)
     except socket.timeout:
         print("Timeout")
-        return None
+        return -1
     except HTTPError:
         print("Bad HTTP status")
-        return None
+        return -1
     except ConnectionError:
         print("Connection error")
-        return None
+        return -1
 
 
 def download(link):
@@ -83,11 +119,13 @@ def download(link):
     if response.status_code != 200:
         raise HTTPError
     image_id = id_generator.generate()
-    temp_file = OUTPUT_DIRECTORY + "tmp" + str(image_id) + ".jpg"
+    temp_file = OUTPUT_DIRECTORY + str(image_id) + ".jpg.dirty"
     with open(temp_file, "wb") as f:
         shutil.copyfileobj(response.raw, f)
-    return temp_file
+    return image_id
 
+def main():
+    clean_dataset(mark_all_dirty())
 
 if __name__ == '__main__':
     main()

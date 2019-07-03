@@ -32,8 +32,6 @@ class ImageTransformer(object):
 
 def main():
     n_images = pandas.read_hdf(SEEK_RESULT_PATH, key="image_ids", start=-1).iloc[0]["image_ids"] + 1
-    print(n_images)
-    exit()
 
     index = nmslib.init(method='hnsw', space='cosinesimil')
     first = True

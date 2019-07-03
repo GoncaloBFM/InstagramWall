@@ -7,9 +7,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import pandas
 
-TAG = "makeup"
+# TAG = "makeup"
 # TAG = "auschwitz"
-# TAG = "planewindow"
+TAG = "planewindow"
 # TAG = "sample"
 
 
@@ -27,7 +27,7 @@ OUTPUT_FILE = OUTPUT_DIR + "{}.h5".format(TAG)
 def main():
     chrome_options = Options()
     # chrome_options.add_argument("user-data-dir=" + "/home/gbfm/.config/google-chrome/Default/")
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     driver = webdriver.Chrome("../lib/chromedriver", options=chrome_options)
     time.sleep(1)
     start_page(driver)
