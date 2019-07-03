@@ -20,7 +20,7 @@ TAG = "makeup"
 # TAG = "auschwitz"
 # TAG = "planewindow"
 # TAG = "sample"
-SIMULTANEOUS = 6
+SIMULTANEOUS = 1
 IMAGE_SIZE = 2  # 1 - 5
 
 OUTPUT_DIRECTORY = "../data/thumbs/{}/".format(TAG)
@@ -113,13 +113,13 @@ def try_download(url):
     try:
         return download(url)
     except socket.timeout:
-        print("Timeout")
+        print("Timeout: {}".format(url))
         return -1
     except HTTPError:
-        print("Bad HTTP status")
+        print("Bad HTTP status: {}".format(url))
         return -1
     except ConnectionError:
-        print("Connection error")
+        print("Connection error: {}".format(url))
         return -1
 
 
@@ -148,6 +148,7 @@ def main():
     if sys.argv[1] == 'r' or sys.argv[1] == 'remove':
         delete_dataset()
         return
+    print("Wrong argument. Use 'download' or 'd', 'cleanup' or 'c' and 'remove' or 'r'.")
 
 
 if __name__ == '__main__':
