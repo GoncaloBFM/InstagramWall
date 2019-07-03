@@ -129,7 +129,7 @@ def download(link):
 
 def main():
     if len(sys.argv) != 2:
-        print("Error: wrong number of arguments. Use 'download' or 'd' and 'cleanup' or 'c'")
+        print("Error: wrong number of arguments. Use 'download' or 'd' and 'cleanup' or 'c'.")
         return
     if sys.argv[1] == 'd' or sys.argv[1] == 'download':
         download_dataset()
