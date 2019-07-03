@@ -1,3 +1,6 @@
+import requests
+from tqdm import tqdm
+
 from utils.url_parsing import InstagramURLParser, BadThumbUrl
 
 import time
@@ -7,9 +10,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import pandas
 
-# TAG = "makeup"
+TAG = "makeup"
 # TAG = "auschwitz"
-TAG = "planewindow"
+# TAG = "planewindow"
 # TAG = "sample"
 
 
@@ -19,6 +22,7 @@ LOGGED_IN_CLASS = "glyphsSpriteUser__outline__24__grey_9 u-__7"
 QUERY = "explore/tags/{}/".format(TAG)
 USER_DATA_DIR = "--profile-directory=Default"
 SAVE_FREQUENCY = 1000
+MAX = 1000000
 
 OUTPUT_DIR = "../data/seek_result/"
 OUTPUT_FILE = OUTPUT_DIR + "{}.h5".format(TAG)
@@ -34,18 +38,11 @@ def main():
 
 
 def start_page(driver):
-    driver.get("https://www.instagram.com/accounts/login")
-    time.sleep(2)
-    driver.find_element(By.CSS_SELECTOR, "[name=username").send_keys('gazdesnake@hotmail.com')
-    driver.find_element(By.CSS_SELECTOR, "[name=password").send_keys('IamCIpher\'0')
-    driver.find_element(By.CSS_SELECTOR, "[type=submit").click()
-    time.sleep(5)
     query_url = "https://www.instagram.com/" + QUERY
     driver.get(query_url)
     time.sleep(2)
     if driver.current_url != query_url:
         raise Exception("Failed to load query page.")
-
     do_page(driver)
 
 
@@ -56,7 +53,7 @@ def do_page(driver):
     saved = 0
     no_new_posts = 0
 
-    while True:
+    while saved < MAX:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         thumbnails = driver.find_elements(By.CLASS_NAME, THUMBNAIL_CLASS)
         for thumbnail in thumbnails:
