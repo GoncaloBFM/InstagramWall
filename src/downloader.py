@@ -136,7 +136,7 @@ def download(link):
 
 def main():
     if len(sys.argv) != 2:
-        print("Error: wrong number of arguments. Use 'download' or 'd', 'cleanup' or 'c' and 'delete' or 'd'.")
+        print("Error: wrong number of arguments. Use 'download' or 'd', 'cleanup' or 'c' and 'remove' or 'r'.")
         return
     if sys.argv[1] == 'd' or sys.argv[1] == 'download':
         download_dataset()
@@ -145,7 +145,7 @@ def main():
     if sys.argv[1] == 'c' or sys.argv[1] == 'cleanup':
         clean_dataset(mark_all_dirty())
         return
-    if sys.argv[1] == 'd' or sys.argv[1] == 'delete':
+    if sys.argv[1] == 'r' or sys.argv[1] == 'remove':
         clean_dataset(delete_dataset())
         return
 
