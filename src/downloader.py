@@ -1,3 +1,5 @@
+import sys
+
 import numpy
 import os
 import shutil
@@ -49,6 +51,7 @@ def log_decorator(func):
         func(*args, **kwargs)
         print("Finished {}".format(func.__name__))
         print()
+
     return wrapper
 
 
@@ -60,7 +63,6 @@ def download_dataset():
     seek_result = None
     result = pandas.DataFrame({"image_ids": pandas.Series(tmp_files, dtype="int16")})
     result.to_hdf(SEEK_RESULT_PATH, key='image_ids', format="t", data_columns=True)
-    return list(result["image_ids"])
 
 
 @log_decorator
@@ -124,8 +126,19 @@ def download(link):
         shutil.copyfileobj(response.raw, f)
     return image_id
 
+
 def main():
-    clean_dataset(mark_all_dirty())
+    if len(sys.argv) != 2:
+        print("Error: wrong number of arguments. Use 'download' or 'd' and 'cleanup' or 'c'")
+        return
+    if sys.argv[1] == 'd' or sys.argv[1] == 'download':
+        download_dataset()
+        clean_dataset()
+        return
+    if sys.argv[1] == 'c' or sys.argv[1] == 'cleanup':
+        clean_dataset(mark_all_dirty())
+        return
+
 
 if __name__ == '__main__':
     main()
