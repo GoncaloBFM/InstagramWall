@@ -1,3 +1,5 @@
 .idea
 data
 results
+__pycache__/
+logs
