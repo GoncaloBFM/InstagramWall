@@ -110,7 +110,7 @@ def clean_dataset(image_ids=None):
             os.rename(old_file, OUTPUT_DIRECTORY + str(new_id) + ".jpg")
             image_ids[index] = new_id
             new_id += 1
-    result = pandas.DataFrame({"image_ids": pandas.Series(image_ids, dtype="int16")})
+    result = pandas.DataFrame({"image_ids": pandas.Series(image_ids, dtype="int32")})
     result.to_hdf(SEEK_RESULT_PATH, key='image_ids', format="t", data_columns=True)
 
 

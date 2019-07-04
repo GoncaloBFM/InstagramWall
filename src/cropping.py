@@ -1,3 +1,4 @@
+import json
 import math
 import os
 import pickle
@@ -8,13 +9,13 @@ from abc import ABC, abstractmethod
 
 TAG = "other"
 IMAGES_DIR = "../data/thumbs/{}/".format(TAG)
-CROPS_DIR = "../data/crops/{}/".format(TAG)
+CROPS_DIR = "../data/crops/other/"
 
 
 def main():
-    image_name = "flower.jpg"
-    # RegularCropper(4, 4).do_cropping(IMAGES_DIR, image_name, CROPS_DIR)
-    SquareCropper(4).do_cropping(IMAGES_DIR, image_name, CROPS_DIR)
+    image_name = "portrait.jpg"
+    RegularCropper(4, 4).do_cropping(IMAGES_DIR, image_name, CROPS_DIR)
+    # SquareCropper(4).do_cropping(IMAGES_DIR, image_name, CROPS_DIR)
 
 
 class GenericCropper(ABC):
@@ -28,11 +29,6 @@ class GenericCropper(ABC):
                 cv2.waitKey(0)
             return
 
-        cropped_image_details = {"image_dir": image_dir,
-                                 "image_name": image_name,
-                                 "width": image.shape[1],
-                                 "height": image.shape[0],
-                                 "output_dir": output_dir}
         crop_details = []
         crops_dir = "{}{}/".format(output_dir, image_name)
         if os.path.isdir(crops_dir):
@@ -44,14 +40,20 @@ class GenericCropper(ABC):
                                  "y": y,
                                  "width": width,
                                  "height": height,
-                                 "file_name": crop_file})
+                                 "source":
+                                     {
+                                         "width": image.shape[1],
+                                         "height": image.shape[0],
+                                         "image_dir": image_dir,
+                                         "image_name": image_name,
+                                         "file_name": crop_file
+                                     }
+                                 })
 
             cv2.imwrite(crops_dir + crop_file, crop)
 
-        cropped_image_details["crop_details"] = crop_details
-
-        with open(crops_dir + "details.pickle", "wb") as f:
-            pickle.dump(cropped_image_details, f)
+        with open(crops_dir + "details.json", "w") as f:
+            json.dump(crop_details, f, indent=4)
 
     @abstractmethod
     def crop_function(self, image):
@@ -72,10 +74,8 @@ class RegularCropper(GenericCropper):
         crops = []
         for y in range(0, image_height, crop_height):
             for x in range(0, image_width, crop_width):
-                actual_crop_width = min(crop_width, image_width - x - crop_width)
-                actual_crop_height = min(crop_height, image_height - x - crop_height)
                 crop = image[y:y + crop_height, x:x + crop_width]
-                crops.append((x, y, actual_crop_width, actual_crop_height, crop))
+                crops.append((x, y, crop_height, crop_width, crop))
         return crops
 
 

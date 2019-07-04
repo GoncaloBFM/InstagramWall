@@ -1,3 +1,4 @@
+import json
 import random
 
 import numpy
@@ -6,11 +7,11 @@ import pickle
 import cv2
 
 TAG = "other"
-CROPS_DIR = "../data/crops/{}/".format(TAG)
+CROPS_DIR = "../data/crops/other/"
 
 
 def main():
-    image_name = "flower.jpg"
+    image_name = "portrait.jpg"
     assemble(image_name)
 
 
@@ -28,14 +29,13 @@ class Canvas:
 
 def assemble(image_name):
     crops_dir = "{}{}/".format(CROPS_DIR, image_name)
-    cropped_image_details = pickle.load(open(crops_dir + "details.pickle", "rb"))
-    image_width, image_height = cropped_image_details["width"], cropped_image_details["height"]
+    crop_details = json.load(open(crops_dir + "details.json", "r"))
+    image_width, image_height = crop_details[0]["source"]["width"], crop_details[0]["source"]["height"]
     canvas = Canvas(image_width, image_height)
     canvas.show()
 
-    crop_details = cropped_image_details["crop_details"]
     for crop_detail in crop_details:
-        crop = cv2.imread(crops_dir + crop_detail["file_name"])
+        crop = cv2.imread(crop_detail["source"]["image_dir"] + crop_detail["source"]["file_name"])
         x, y = crop_detail["x"], crop_detail["y"]
         canvas.paint(x, y, crop)
         canvas.show()
