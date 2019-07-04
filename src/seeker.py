@@ -82,7 +82,7 @@ def do_page(driver):
         if not_saved > SAVE_FREQUENCY:
             print("Writing")
             hdf = pandas.HDFStore(OUTPUT_FILE)
-            hdf.append("urls", pandas.DataFrame(posts, columns=["link", *["thumb{}".format(n) for n in range(1, 6)]]), format="t", data_columns=True)
+            hdf.append("urls", pandas.DataFrame(posts, columns=["ur l", *["thumb{}".format(n) for n in range(1, 6)]]), format="t", data_columns=True)
             hdf.close()
             saved += not_saved
             not_saved = 0

@@ -1,5 +1,6 @@
 import sys
 
+import h5py
 import numpy
 import os
 import shutil
@@ -20,7 +21,7 @@ TAG = "makeup"
 # TAG = "auschwitz"
 # TAG = "planewindow"
 # TAG = "sample"
-SIMULTANEOUS = 1
+SIMULTANEOUS = 4
 IMAGE_SIZE = 2  # 1 - 5
 
 OUTPUT_DIRECTORY = "../data/thumbs/{}/".format(TAG)
@@ -63,6 +64,7 @@ def download_dataset():
     seek_result = None
     result = pandas.DataFrame({"image_ids": pandas.Series(tmp_files, dtype="int16")})
     result.to_hdf(SEEK_RESULT_PATH, key='image_ids', format="t", data_columns=True)
+    return tmp_files
 
 
 @log_decorator
@@ -74,6 +76,10 @@ def mark_all_dirty():
 
 @log_decorator
 def delete_dataset():
+    with h5py.File(SEEK_RESULT_PATH, "a") as f:
+        if "image_ids" in f:
+            del f["image_ids"]
+
     for file_name in tqdm(os.listdir(OUTPUT_DIRECTORY)):
         old_file = OUTPUT_DIRECTORY + file_name
         os.remove(old_file)
@@ -139,8 +145,8 @@ def main():
         print("Error: wrong number of arguments. Use 'download' or 'd', 'cleanup' or 'c' and 'remove' or 'r'.")
         return
     if sys.argv[1] == 'd' or sys.argv[1] == 'download':
-        download_dataset()
-        clean_dataset()
+        delete_dataset()
+        clean_dataset(download_dataset())
         return
     if sys.argv[1] == 'c' or sys.argv[1] == 'cleanup':
         clean_dataset(mark_all_dirty())
