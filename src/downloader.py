@@ -32,13 +32,13 @@ socket.setdefaulttimeout(10)
 
 class IdGenerator:
     def __init__(self):
-        self.current = 0
-        self.lock = threading.Lock()
+        self.__current = 0
+        self.__lock = threading.Lock()
 
     def generate(self):
-        with self.lock:
-            result = self.current
-            self.current += 1
+        with self.__lock:
+            result = self.__current
+            self.__current += 1
         return result
 
 
