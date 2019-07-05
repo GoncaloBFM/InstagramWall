@@ -62,7 +62,7 @@ def download_dataset():
     with ThreadPoolExecutor(max_workers=SIMULTANEOUS) as executor:
         tmp_files = list(tqdm(executor.map(try_download, seek_result), total=len(seek_result)))
     seek_result = None
-    result = pandas.DataFrame({"image_ids": pandas.Series(tmp_files, dtype="int16")})
+    result = pandas.DataFrame({"image_ids": pandas.Series(tmp_files, dtype="int32")})
     result.to_hdf(SEEK_RESULT_PATH, key='image_ids', format="t", data_columns=True)
     return tmp_files
 

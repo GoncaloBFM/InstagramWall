@@ -6,8 +6,8 @@ import pickle
 
 import cv2
 
-TAG = "other"
-CROPS_DIR = "../data/crops/other/"
+TARGET = "0"
+CROPS_DIR = "../data/crops/{}.jpg/".format(TARGET)
 
 
 def main():
@@ -39,6 +39,7 @@ def assemble(image_name):
         x, y = crop_detail["x"], crop_detail["y"]
         canvas.paint(x, y, crop)
         canvas.show()
+
 
 if __name__ == '__main__':
     main()
