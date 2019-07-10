@@ -7,20 +7,20 @@ import shutil
 import cv2
 from abc import ABC, abstractmethod
 
-TAG = "other"
-IMAGES_DIR = "../data/thumbs/{}/".format(TAG)
-CROPS_DIR = "../data/crops/other/"
+from utils.image import cv2_read_image
 
 
 def main():
+    images_dir = "../data/scraps/other/"
+    crops_dir = "../data/scraps/"
     image_name = "portrait.jpg"
-    RegularCropper(4, 4).do_cropping(IMAGES_DIR, image_name, CROPS_DIR)
+    RegularCropper(4, 4).do_cropping(images_dir, image_name, crops_dir)
     # SquareCropper(4).do_cropping(IMAGES_DIR, image_name, CROPS_DIR)
 
 
 class GenericCropper(ABC):
     def do_cropping(self, image_dir, image_name, output_dir):
-        image = cv2.imread(image_dir + image_name)
+        image = cv2_read_image(image_dir + image_name)
         crops = self.crop_function(image)
 
         if output_dir is None:
@@ -30,7 +30,7 @@ class GenericCropper(ABC):
             return
 
         crop_details = []
-        crops_dir = "{}{}/".format(output_dir, image_name)
+        crops_dir = "{}{}{}/".format(output_dir, image_name, ".crops")
         if os.path.isdir(crops_dir):
             shutil.rmtree(crops_dir)
         os.mkdir(crops_dir)
@@ -46,7 +46,8 @@ class GenericCropper(ABC):
                                          "height": image.shape[0],
                                          "image_dir": image_dir,
                                          "image_name": image_name,
-                                         "file_name": crop_file
+                                         "crop_dir": crops_dir,
+                                         "crop_name": crop_file
                                      }
                                  })
 
@@ -54,6 +55,7 @@ class GenericCropper(ABC):
 
         with open(crops_dir + "details.json", "w") as f:
             json.dump(crop_details, f, indent=4)
+        return crops_dir
 
     @abstractmethod
     def crop_function(self, image):
