@@ -23,7 +23,8 @@ SEEK_RESULT_PATH = "../data/seek_result/{}.h5".format(TAG)
 
 def main():
     # knn()
-    knn_for_all()
+    # knn_for_all()
+    brute_force_neighbors()
 
 
 def knn_for_all():
