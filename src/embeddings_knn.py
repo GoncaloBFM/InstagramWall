@@ -17,7 +17,7 @@ EMBEDDINGS_PATH = "../data/embeddings/{}.index".format(TAG)
 K_DIR = "../results/k_1/{}/".format(TAG)
 K10_DIR = "../results/k_all/{}/".format(TAG)
 BRUTE_DIR = "../results/k_brute/{}/".format(TAG)
-SEEK_RESULT = pandas.read_pickle("../data/seek_result/{}.h5".format(TAG))
+SEEK_RESULT = pandas.read_hdf("../data/seek_result/{}.h5".format(TAG))
 SEEK_RESULT_PATH = "../data/seek_result/{}.h5".format(TAG)
 
 
