@@ -10,7 +10,8 @@ RUN pip install \
 	tensorflow \
 	requests \
 	scikit-image \
-	nmslib
+	nmslib \
+	sklearn
 
 WORKDIR /InstagramWall/
 
