@@ -1,8 +1,11 @@
+import json
+
 import nmslib
 import pandas
 import heapq
 
 from scipy import spatial
+from tqdm import tqdm
 
 from similar_cnn_utils.CV_IO_utils import read_imgs_dir, read_img
 from similar_cnn_utils.CV_plot_utils import plot_query_retrieval
@@ -14,10 +17,10 @@ TAG = "makeup"
 
 IMAGES_PATH = "../data/thumbs/{}/".format(TAG)
 EMBEDDINGS_PATH = "../data/embeddings/{}.index".format(TAG)
-K_DIR = "../results/k_1/{}/".format(TAG)
-K10_DIR = "../results/k_all/{}/".format(TAG)
-BRUTE_DIR = "../results/k_brute/{}/".format(TAG)
-SEEK_RESULT = None # pandas.read_hdf("../data/seek_result/{}.h5".format(TAG))
+K_1_DIR = "../data/knn/k_1/{}/".format(TAG)
+K_ALL_DIR = "../data/knn/k_all/{}/".format(TAG)
+K_BRUTE_DIR = "../data/knn/k_brute/{}/".format(TAG)
+SEEK_RESULT = None  # pandas.read_hdf("../data/seek_result/{}.h5".format(TAG))
 SEEK_RESULT_PATH = "../data/seek_result/{}.h5".format(TAG)
 
 
@@ -40,7 +43,7 @@ def knn_for_all():
         embeddings = index[image_index]
         neighbors, distances = index.knnQuery(embeddings, k=k)
         result = read_imgs_dir([IMAGES_PATH + str(neighbor_id) + ".jpg" for neighbor_id in neighbors], parallel=True)
-        plot_query_retrieval(image_id, neighbors, read_img(IMAGES_PATH + str(image_id) + ".jpg"), result, K10_DIR + str(image_id) + ".jpg")
+        plot_query_retrieval(image_id, neighbors, read_img(IMAGES_PATH + str(image_id) + ".jpg"), result, K_ALL_DIR + str(image_id) + ".jpg")
         print("{} of {} ({}%)".format(image_index + 1, len(image_ids), ((image_index + 1) * 100) / len(image_ids)))
         image_index += 1
 
@@ -56,21 +59,22 @@ def knn():
     embeddings = index[target_index]
     neighbors, distances = index.knnQuery(embeddings, k=k)
     result = read_imgs_dir([IMAGES_PATH + image_ids[neighbor_id] + ".jpg" for neighbor_id in neighbors], parallel=True)
-    plot_query_retrieval(target_id, neighbors, read_img(IMAGES_PATH + target_id + ".jpg"), result, K_DIR + target_id + ".jpg")
+    plot_query_retrieval(target_id, neighbors, read_img(IMAGES_PATH + target_id + ".jpg"), result, K_1_DIR + target_id + ".jpg")
 
 
 def brute_force_neighbors():
     k = 100
 
-    target_id = "173"
-    n_images = pandas.read_hdf(SEEK_RESULT_PATH, key="image_ids", start=-1).iloc[0]["image_ids"] + 1
+    target_id = "37706"
+    print("Reading index")
     index = nmslib.init(method='hnsw', space='cosinesimil')
     index.loadIndex(EMBEDDINGS_PATH, load_data=True)
+    print("Finished reading index")
 
     heap = []
 
     target_embeddings = index[int(target_id)]
-    for i in range(1000): #n_images and parallel
+    for i in tqdm(range(len(index))):
         image_id = str(i)
         if image_id == target_id:
             continue
@@ -79,13 +83,13 @@ def brute_force_neighbors():
         distance = spatial.distance.cosine(target_embeddings, other_embeddings)
         heapq.heappush(heap, (-distance, image_id))
         if len(heap) > k:
-            heapq.heappop()
-    neighbors_ids = map(lambda x: x[1], sorted(list(map(lambda x: (-x[0], x[1]), heap))))
+            heapq.heappop(heap)
+    neighbors_ids = list(map(lambda x: x[1], sorted(list(map(lambda x: (-x[0], x[1]), heap)))))
 
     result = read_imgs_dir([IMAGES_PATH + neighbor_id + ".jpg" for neighbor_id in neighbors_ids], parallel=True)
-    plot_query_retrieval(target_id, neighbors_ids, read_img(IMAGES_PATH + target_id + ".jpg"), result, K_DIR + target_id + ".jpg")
+    plot_query_retrieval(target_id, neighbors_ids, read_img(IMAGES_PATH + target_id + ".jpg"), result, K_BRUTE_DIR + target_id + ".jpg")
 
-
+    json.dump([target_id] + neighbors_ids, open(K_BRUTE_DIR + target_id + ".json", "w"))
 
 
 if __name__ == '__main__':
